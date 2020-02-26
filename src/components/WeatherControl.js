@@ -7,6 +7,10 @@ const extractWeather = data => {
   const xmlDocument = parser.parseFromString(data, 'text/xml');
 
   const titles = xmlDocument.getElementsByTagName('title');
+  if (titles.length <= 2) {
+    throw new Error('Weather response not in correct format!');
+  }
+
   const location = titles[0].innerHTML.substr(26).trim();
   const weather = titles[2].innerHTML.substr(titles[2].innerHTML.indexOf(':') + 1).trim();
 
@@ -21,10 +25,18 @@ const styles = {
     height: '150px',
     margin: '10px',
     padding: '10px',
+    backgroundColor: 'white',
+    opacity: '0.95',
     boxShadow: '-2px 4px 15px 1px rgba(0,0,0,0.5)',
   },
-  loading: {},
-  error: {},
+  loading: {
+    textAlign: 'center',
+    fontStyle: 'italic',
+  },
+  error: {
+    textAlign: 'center',
+    fontStyle: 'italic',
+  },
   weather: {
     height: '100px',
   },
@@ -82,7 +94,7 @@ export default class WeatherControl extends React.Component {
       },
       () => {
         const url = WEATHER_URL + city;
-        fetch(url)
+        fetch(url, { cache: 'no-cache' })
           .then(response => response.text())
           .then(weather => {
             this.setState({
@@ -111,7 +123,7 @@ export default class WeatherControl extends React.Component {
       <div style={styles.card}>
         <div style={styles.caption}>{location}</div>
         <div style={styles.weather}>
-          {loading && <div style={styles.loading}>Busy...</div>}
+          {loading && <div style={styles.loading}>Loading...</div>}
           {error && <div style={styles.error}>Error! {error.message || error}</div>}
           {!loading && !error && weather && <div>{weather}</div>}
         </div>
